@@ -1,0 +1,80 @@
+EX: 2
+Implementing threads
+
+FILES:
+sleeping_threads_list.h - the header file for the supplied class that handles timer values for sleeping threads
+sleeping_threads_list.cpp - the implementation of the above
+thread.h - the header file for the thread class
+thread.cpp - the implementation of the thread class
+uthreads.cpp - the implementation of the header file given to us in the assignment
+
+REMARKS:
+
+* During the course of writing this library, we were told to address and block signals at appropriate times in the
+program. In my implementation, I addressed 2 signals that were sent - the real timer and the virtual timer. Blocking
+these signals occurs every time we execute operations on the thread queues, so that we we won't jump between threads
+(the virtual timer) or wake up sleeping thread(the real timer) while doing critical operations.
+
+* Following up on the previos remark, In my implementation, there is a static timer that counts down the virtual time,
+and another timer that counts down the actual (real) time. This is done mainly for the sake of convenience, so that
+there is a clear seperation between the 2.
+
+* Although we were not required in the library to support any actions on the deleted threads, i created a vector
+containing all of the threads that were deleted, for the sake of portability and possible future expansion needs.
+
+* The use of shared pointers in the queues (the queues were of shared pointers of thread objects)
+ was meant to save the hassle of memory management.
+
+
+
+ANSWERS:
+
+Q1:
+Describe one general use of user-level threads and explain why user-level threads are a
+reasonable choice for your example.
+
+A1:
+One general use of user level threads would be to perform 2 tasks nearly "simultaniously". For instance, if we were to
+create an application that lets the user apply real time filters straight to the camera UI, we might want to apply a
+filter to the viewfinder (which is one thread) and already start saving the RAW data from the picture to the
+buffer for increased performance (which is another thread).
+User level threads would be an appropriate choice here, as these are two unrelated tasks, that use the same hardware
+and memeory space, and there is no need for the OS to know that there are several "things" running at once. Plus, it
+helps encapsulate the app from the phone's hardware.
+
+Q2:
+Google’s Chrome browser creates a new process for each tab. What are the advantages and
+disadvantages of creating the new process (instead of creating kernel-level thread)?
+
+A2:
+Creating a new process for each tab instead of a user-level thread allows on one hand better multi-core use
+(of which most modern computers emply), while protecting each tab from accessing memory it shouldn't be handling.
+On the down side, switching between tabs, which can be frequent, requires OS level interruption and traps, which are
+costly. However, as most users don't switch between significantly more threads than cores in a short amount of time,
+this is a reasonable restriction.
+
+Q3:
+Interrupts and signals:
+a. Open an application (for example, “Shotwell” on one of the CS computers). Use the “ps -A”
+command to extract the application’s pid (process ID).
+b. Open a shell and type “kill pid”
+c. Explain which interrupts and signals are involved during the command execution, what
+triggered them and who should handle them. In your answer refer to the keyboard, OS,
+shell and the application you just killed
+
+A3:
+When typing the "kill" command, a hardware I/O signal is sent from the Keyboard to the CPU. Once we press enter and
+that is registered, a software "kill" signal is sent to the OS code that handles the "kill" command (either the built in
+signal handler, or a special "kill" handler") which then runs OS code that stops the user application.
+
+Q4:
+What is the difference between ‘real’ and ‘virtual’ time? Give one example of using each.
+
+A4:
+"real" time is the actual time on the meta-physical clock (though, honestly, time is such a slippery concept both
+philosophically and in quantum physics, that i doubt there is such a thing as empiric time that justifies the adjective
+"real"). While virtual time is the time spent in a process, and not on system handling function or code that runs in OS
+mode.
+An example might be that if we open "facebook", at time 0, then the time until the touch is registered from the
+screen to the processor will be counted in real time, but won't be counted in virtual time. So when the app actually
+opens, there probably will be a bit of a discrepancy between the 2.
