@@ -1,2 +1,2 @@
 # Operating-Systems
-repo for HUJI CPP course - 67808
+repo for HUJI OS course - 67808
