@@ -1,0 +1,47 @@
+Exercise 4 (instructions in ex4.pdf)
+
+Implementing virtual memory
+
+FILES:
+
+VirtualMemory.cpp - The implementation file of the page hierarchy memory system
+
+README - This file
+
+Makefile - The makefile
+
+Files supplied by the course staff:
+
+
+REMARKS:
+
+* Since we were allowed to assume that the input is valid, the only way VMread and VMwrite would return 0 is if the
+inputted virtual address exceeds the virtual memory size.
+
+* Our implementation of the page table tree roughly follows this logic:
+From the top of the tree all the way down to the page we wish to write to - do the following:
+    a) Extract the "bracket" (i.e. the relevant part of the virtual address) that indicates the offset of the current
+    level (read - page table/page itself) .
+    b) try to read the address that we extracted, and check if it is stored in the physical memory
+        1) if it's stored in the memory - continue going down the tree (back to a)
+        2) else - recursively go over the entire tree (using DFS (which is in-order traversal of a tree)) and look
+        for any of the following (in order): unused frame, empty frame, a leaf (meaning a page, and not a page table)
+        that is loaded into the memory that has the maximal distance from the page we wish tto write to. Evict said
+        frame and load the current table into the physical memory.
+     Once we found a frame, and loaded all the page tables leading up to this page to memory, we can restore the page
+     to the physical memory and write/read to it.
+
+* Our "DFS" function (that finds a frame if a page fault happens when going down the tree) is a void function that
+stores the relevant information in pointers that are passed to it from the function going down the tree.
+ Each case (empty, unused, evicted) gets its own pointers.
+ The DFS function garauntees that for for any step going down the tree - if a page fault happens, the pointers of
+ the correct case (empty, unused or evicted) will be correct when the function completes. There is no garantee
+ about the other pointers.
+ The function that traverses the tree (unsurprisingly called "treeTraverse") which calls the DFS function in case of a
+  page fault, chooses which pointers to use based on the order of precedence described above.
+
+
+
+
+
+
