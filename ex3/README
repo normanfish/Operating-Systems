@@ -1,4 +1,4 @@
-EX: 3
+EX: 3 (instruction are in ex3.pdf)
 
 Building a MapReduce Framework, using C threads, mutexes, semaphores and shared memory
 
