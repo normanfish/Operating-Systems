@@ -9,6 +9,8 @@ views: 1) the view of the job - which contains functions that are to be used by 
 close ect) and 2) the view of each individual thread - these functions are built as if for one thread
 (mapReduceMainThread, findMaxKey).
 
+MapReduceFramework.h - The header file for the above file. Supplied by the course staff
+
 Barrier.cpp - The implementation file for the supplied barrier class. The Barrier class was supplied to us by the course staff.
 
 Barrier.h - The header file for the supplied barrier class.
