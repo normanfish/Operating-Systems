@@ -11,6 +11,7 @@ README - This file
 Makefile - The makefile
 
 Files supplied by the course staff:
+header files, the physical memory interface we will be working with, and a simple test file
 
 
 REMARKS:
