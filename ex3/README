@@ -1,0 +1,52 @@
+EX: 3
+
+Building a MapReduce Framework, using C threads, mutexes, semaphores and shared memory
+
+FILES:
+MapReduceFramework.cpp - The main source file. Each job creates its own threads, and has its own jobContext
+(a separate class that holds all the information needed for the job to run). The file is built employing 2 different
+views: 1) the view of the job - which contains functions that are to be used by the user of the this library (wait,
+close ect) and 2) the view of each individual thread - these functions are built as if for one thread
+(mapReduceMainThread, findMaxKey).
+
+Barrier.cpp - The implementation file for the supplied barrier class.
+
+Barrier.h - The header file for the supplied barrier class.
+
+README - This file.
+
+Makefile - The makefile
+
+REMARKS:
+
+*   We used 4 mutexes and 1 semaphore in our implementation. Each mutex is used to access a different vector that are
+    shared resources among the threads, and the mutex is to notify the threads when a thread has finished shuffling, and
+    added a new vector to be reduced.
+
+*   As stated above, each job (upon creation) has its own environment. This environment contains the pool of threads
+    that will be working on the sub-tasks of the job. To this end - each thread also gets its own environment where it
+    stores its data, and accesses shared job resources (such as the input vector, mutexes and so on).
+    Obviously, each thread has to be able to access the job's data structures so that it can execute the different stages.
+    While there are many ways of doing this, we went with a "naive" approach, and added to each thread's environment a
+    pointer to the shared data structures of the job (meaning, if we have one job and 5 threads, each thread will point to
+    that job and its memory).
+
+*   In the reduce phase - while each of the non-shuffling threads are waiting for same-key vectors to be inserted into
+    the Vector of intermediate vectors, they are essentially waiting for a semaphore that "lights up" when the shuffling
+    thread finishes reordering an Intermediate vector. A problem may occur, when all of the vectors have been
+    shuffled, and a thread has just finished reducing the final shuffled vector - all of the other threads will still be
+    waiting for the semaphore to rise - even though we are not shuffling vectors any longer! to deal with this,
+    the thread that reduces that last vector will raise the semaphore once it reaches the end of its lifecycle. Then,
+    immediately after each thread enters the semaphore we can be in one of the following:
+             1) the shuffling thread has created a new vector, and we can reduce it.
+             2) a thread has finished reducing, and that last thread exited the while loop.
+    if we are in the first case - then the threads will continue reducing as usual, and if we are in the second case,
+    each thread will then exit the loop (as there are no more vectors to reduce) and "up" the semaphore so
+    that any thread that is still waiting can also exit the loop.
+
+
+
+
+
+
+
